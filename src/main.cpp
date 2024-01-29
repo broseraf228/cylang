@@ -1,53 +1,54 @@
-#include <time.h>
-
-#include <string>
-#include <iostream>
-#include <chrono>
-
 #include <SFML/Graphics.hpp>
+#include <vector>
+#include <map>
+#include <string>
+#include "GameMap.hpp"
 
-using namespace sf;
+std::map<int, sf::Color> colorMap;
+
+int main() {
+	colorMap[0] = sf::Color::Black;
+	colorMap[1] = sf::Color::White;
+	colorMap[2] = sf::Color::Red;
+	colorMap[3] = sf::Color::Green;
+	colorMap[4] = sf::Color::Blue;
+	
+	sf::RenderWindow window(sf::VideoMode(1600, 1200), "SFML game");
+	//window.setVerticalSyncEnabled(true);
+
+	GameMap gameMap(&window, 48,48);
+
+	gameMap.setMapSize();
+	gameMap.fillMap();
+	gameMap.fillVertexArray();
 
 
-const int WINDOW_SIZE_X = 600;
-const int WINDOW_SIZE_Y = 400;
+	sf::Clock clock;
+	while (window.isOpen()) {
+		sf::Event event;
 
+		while (window.pollEvent(event)) {
+			if (event.type == sf::Event::Closed)
+				window.close();
 
+			if (event.type == sf::Event::KeyPressed)
+				if (event.key.code == sf::Keyboard::Escape)
+					window.close();
+		}
 
-int main()
-{
-    srand(time(NULL));
-    RenderWindow window(VideoMode(WINDOW_SIZE_X, WINDOW_SIZE_Y), L"Titul", Style::Default);
+		window.clear();
+		window.draw(*(gameMap.getVertexArray()));
+		window.display();
 
-    //Массив точек
-    VertexArray mypoint(Points, 3000000);
-    for (int i = 0; i < 3000000; i++)
-        mypoint[i].position = Vector2f(rand() % WINDOW_SIZE_X, rand() % WINDOW_SIZE_Y);
+		//gameMap.fillMap();
+		//gameMap.fillVertexArray();
 
-    std::chrono::high_resolution_clock::time_point start;
-    std::chrono::high_resolution_clock::time_point end;
-    float fps;
+		
+		// Calculate and print FPS
+		sf::Time elapsed = clock.restart();
+		float fps = 1.0f / elapsed.asSeconds();
+		window.setTitle(std::to_string(fps));
+	}
 
-    while (window.isOpen())
-    {
-
-        start = std::chrono::high_resolution_clock::now();
-
-        Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == Event::Closed) window.close();
-        }
-
-        window.clear(Color::Blue);
-        window.draw(mypoint); // Точка
-
-        window.display();
-
-        end = std::chrono::high_resolution_clock::now();
-        fps = (float)1e9 / (float)std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-        window.setTitle(std::to_string(fps));
-
-    }
-    return 0;
+	return 0;
 }
