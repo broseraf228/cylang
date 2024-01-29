@@ -2,24 +2,23 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <iostream>
 #include "GameMap.hpp"
+#include "ResourceManager.hpp"
 
-std::map<int, sf::Color> colorMap;
 
-int main() {
-	colorMap[0] = sf::Color::Black;
-	colorMap[1] = sf::Color::White;
-	colorMap[2] = sf::Color::Red;
-	colorMap[3] = sf::Color::Green;
-	colorMap[4] = sf::Color::Blue;
+int main(int argc, char* argv[]) {
+	std::string i_path;
+	i_path = argv[0];
+	ResourceManager resManager(i_path);
+	std::cout << resManager.loadStringFromFile("maps\\map1.txt") << std::endl;
 	
-	sf::RenderWindow window(sf::VideoMode(1600, 1200), "SFML game");
+	sf::RenderWindow window(sf::VideoMode(1200, 800), "SFML game");
 	//window.setVerticalSyncEnabled(true);
 
-	GameMap gameMap(&window, 48,48);
+	GameMap gameMap(&window, 1,1);
 
-	gameMap.setMapSize();
-	gameMap.fillMap();
+	gameMap.loadMapFromStr(resManager.loadMap("map1"));
 	gameMap.fillVertexArray();
 
 
@@ -37,14 +36,11 @@ int main() {
 		}
 
 		window.clear();
-		window.draw(*(gameMap.getVertexArray()));
+		window.draw(gameMap.getVertexArray());
 		window.display();
 
-		//gameMap.fillMap();
-		//gameMap.fillVertexArray();
 
-		
-		// Calculate and print FPS
+
 		sf::Time elapsed = clock.restart();
 		float fps = 1.0f / elapsed.asSeconds();
 		window.setTitle(std::to_string(fps));

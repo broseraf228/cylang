@@ -11,6 +11,10 @@ add_executable(${PROJECT_NAME}
 				src/main.cpp
 				src/GameMap.hpp
 				src/GameMap.cpp
+				src/m_std.hpp
+				src/m_std.cpp
+				src/ResourceManager.hpp
+				src/ResourceManager.cpp
 				)
 
 FILE(COPY res DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}")

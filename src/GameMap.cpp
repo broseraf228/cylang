@@ -1,6 +1,6 @@
 #include "GameMap.hpp"
+#include "m_std.hpp"
 #include <iostream>
-
 
 GameMap::GameMap(sf::RenderWindow* window, int mapSX, int mapSY) {
 	//сохран€ю переменные
@@ -10,20 +10,7 @@ GameMap::GameMap(sf::RenderWindow* window, int mapSX, int mapSY) {
 	m_mapSizeX = mapSX;
 	m_mapSizeY = mapSY;
 
-	//масштабирую карту под размеры окна (Ќ≈ “–ќ√ј“№ ѕќ ј Ќ≈ —Ћќћј≈“—я)
-	double rat = (double)m_mapSizeX / m_mapSizeY;
-
-	m_mapOnScreenSizeX = (double)(m_windowSizeY * m_mapSizeX) / m_mapSizeY;
-	m_mapOnScreenSizeY = (double)m_windowSizeY;
-	
-	if(m_mapOnScreenSizeX > m_windowSizeX || m_mapOnScreenSizeY > m_windowSizeY) {
-		m_mapOnScreenSizeX = (double)m_windowSizeX;
-		m_mapOnScreenSizeY = (double)(m_windowSizeX * m_mapSizeY) / m_mapSizeX;
-	}
-
-
-	//вычисл€ю размер тайла в пиксел€х
-	tileSize = (float)m_mapOnScreenSizeX / m_mapSizeX;
+	setMapSize();
 	//очевидно
 	m_vertexArray.setPrimitiveType(sf::Quads);
 
@@ -36,15 +23,47 @@ GameMap::GameMap(sf::RenderWindow* window, int mapSX, int mapSY) {
 }
 GameMap::~GameMap() {}
 
+void GameMap::loadMapFromStr(std::string inMap) {
+	std::vector<std::string> splittedMapf = splitString(inMap, '\n');
+	std::vector<std::vector<std::string>> splittedMap;
+	splittedMap.resize(splittedMapf.size());
+	for (int i = 0; i < splittedMapf.size(); i++) {
+		splittedMap[i] = splitString(splittedMapf[i], ' ');
+	}
+
+	m_mapSizeX = splittedMap[0].size();
+	m_mapSizeY = splittedMap.size();
+	setMapSize();
+	for (int ix = 0; ix < m_mapSizeX; ix++) {
+		for (int iy = 0; iy < m_mapSizeY; iy++) {
+			m_map[ix][iy] = std::stoi(splittedMap[iy][ix]);
+		}
+	}
+
+}
+
 void GameMap::setMapSize(int sX, int sY) {
-	m_map.resize(sX);
-	for (int i = 0; i < m_map.size(); i++)
-		m_map[i].resize(sY);
+	m_mapSizeX = sX;
+	m_mapSizeY = sY;
+	setMapSize();
 }
 void GameMap::setMapSize() {
 	m_map.resize(m_mapSizeX);
 	for (int i = 0; i < m_map.size(); i++)
 		m_map[i].resize(m_mapSizeY);
+
+	//масштабирую карту под размеры окна (Ќ≈ “–ќ√ј“№ ѕќ ј Ќ≈ —Ћќћј≈“—я)
+	double rat = (double)m_mapSizeX / m_mapSizeY;
+
+	m_mapOnScreenSizeX = (double)(m_windowSizeY * m_mapSizeX) / m_mapSizeY;
+	m_mapOnScreenSizeY = (double)m_windowSizeY;
+
+	if (m_mapOnScreenSizeX > m_windowSizeX || m_mapOnScreenSizeY > m_windowSizeY) {
+		m_mapOnScreenSizeX = (double)m_windowSizeX;
+		m_mapOnScreenSizeY = (double)(m_windowSizeX * m_mapSizeY) / m_mapSizeX;
+	}
+	//вычисл€ю размер тайла в пиксел€х
+	tileSize = (float)m_mapOnScreenSizeX / m_mapSizeX;
 }
 
 void GameMap::fillMap() {
@@ -85,6 +104,6 @@ void GameMap::addSqare(int posX, int posY, int sizeX, int sizeY, sf::Color color
 	m_vertexArray.append(sf::Vertex(sf::Vector2f(posX, posY + sizeY), color));
 }
 
-sf::VertexArray* GameMap::getVertexArray() {
-	return &m_vertexArray;
+sf::VertexArray& GameMap::getVertexArray() {
+	return m_vertexArray;
 }

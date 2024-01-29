@@ -1,5 +1,7 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <string>
+#include <vector>
 
 class GameMap
 {
@@ -19,8 +21,8 @@ private:
 	void setMapSize(int sX, int sY);
 public:
 	GameMap(sf::RenderWindow* window, int mapSX, int mapSY);
-
 	~GameMap();
+	void loadMapFromStr(std::string inMap);
 
 	void addSqare(int posX, int posY, int sizeX, int sizeY, sf::Color color);
 
@@ -30,5 +32,5 @@ public:
 
 	void fillVertexArray();
 
-	sf::VertexArray* getVertexArray();
+	sf::VertexArray& getVertexArray();
 };
