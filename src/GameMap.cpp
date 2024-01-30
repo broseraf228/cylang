@@ -4,7 +4,7 @@
 
 GameMap::GameMap(sf::RenderWindow* window, int mapSX, int mapSY) {
 	//сохран€ю переменные
-	m_currentWindow = window;
+	m_window = window;
 	m_windowSizeX = (*window).getSize().x;
 	m_windowSizeY = (*window).getSize().y;
 	m_mapSizeX = mapSX;
@@ -106,4 +106,8 @@ void GameMap::addSqare(int posX, int posY, int sizeX, int sizeY, sf::Color color
 
 sf::VertexArray& GameMap::getVertexArray() {
 	return m_vertexArray;
+}
+
+void GameMap::draw() {
+	(*m_window).draw(m_vertexArray);
 }

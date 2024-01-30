@@ -14,9 +14,16 @@ int main(int argc, char* argv[]) {
 	std::cout << resManager.loadStringFromFile("maps\\map1.txt") << std::endl;
 	
 	sf::RenderWindow window(sf::VideoMode(1200, 800), "SFML game");
-	//window.setVerticalSyncEnabled(true);
 
 	GameMap gameMap(&window, 1,1);
+
+	resManager.loadTexture("fne", "img\\floor_not_effect.png");
+	sf::Texture textur;
+	textur = resManager.getTexture("fne");
+	sf::Sprite sprite;
+	sprite.setTexture(textur);
+	sprite.setTextureRect(sf::IntRect(0,0,32,32));
+	sprite.setPosition(100,100);
 
 	gameMap.loadMapFromStr(resManager.loadMap("map1"));
 	gameMap.fillVertexArray();
@@ -36,7 +43,8 @@ int main(int argc, char* argv[]) {
 		}
 
 		window.clear();
-		window.draw(gameMap.getVertexArray());
+		gameMap.draw();
+		window.draw(sprite);
 		window.display();
 
 
