@@ -4,7 +4,7 @@
 
 
 Tile::Tile(std::string texName, ResourceManager& resMan) {
-	texture = resMan.getTexture(texName);
+	texture = texName;
 }
 Tile::Tile() {
 
@@ -19,11 +19,6 @@ GameMap::GameMap(sf::RenderWindow* window, ResourceManager* i_resourceManager, i
 	m_windowSizeY = (*window).getSize().y;
 	m_mapSizeX = mapSX;
 	m_mapSizeY = mapSY;
-
-	setMapSize();
-
-	//очевидно
-	m_vertexArray.setPrimitiveType(sf::Quads);
 }
 GameMap::~GameMap() {}
 
@@ -41,9 +36,7 @@ void GameMap::loadMapFromStr(std::string inMap) {
 		splittedMapf.erase(splittedMapf.cbegin());
 	}
 
-
 	//этап загрузки карты
-	
 	std::vector<std::vector<std::string>> splittedMap;
 	splittedMap.resize(splittedMapf.size());
 	for (int i = 0; i < splittedMapf.size(); i++) {
@@ -72,8 +65,9 @@ void GameMap::loadMapFromStr(std::string inMap) {
 	}
 	//вычисл€ю размер тайла в пиксел€х
 	tileSize = (float)m_mapOnScreenSizeX / m_mapSizeX;
-
+	generateRenderTextur();
 }
+
 
 void GameMap::setMapSize(int sX, int sY) {
 	m_mapSizeX = sX;
@@ -87,19 +81,49 @@ void GameMap::setMapSize() {
 }
 
 
+void GameMap::generateRenderTextur()
+{
+	float scale = tileSize / 32;
+
+	m_renderTexture.create(m_mapOnScreenSizeX, m_mapOnScreenSizeY);
+	sf::Sprite tmp_sprite;
+
+	for (int ix = 0; ix < m_mapSizeX; ix++) {
+		for (int iy = 0; iy < m_mapSizeY; iy++) {
+			tmp_sprite.setTexture((*m_resourceManager).getTexture(m_map[ix][iy].texture));
+			tmp_sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
+			tmp_sprite.setPosition(sf::Vector2f(ix * tileSize, iy * tileSize));
+			tmp_sprite.setScale(scale, scale);
+			m_renderTexture.draw(tmp_sprite);
+		}
+	}
+	int offsetX = (m_windowSizeX - m_mapOnScreenSizeX) * 0.5;
+	int offsetY = (m_windowSizeY - m_mapOnScreenSizeY) * 0.5;
+	m_renderSprite.setTexture(m_renderTexture.getTexture());
+	m_renderSprite.setTextureRect(sf::IntRect(0, 0, m_mapOnScreenSizeX, m_mapOnScreenSizeY));
+	m_renderSprite.setPosition(sf::Vector2f(offsetX, offsetY));
+
+}
+
+
 void GameMap::draw() {
+	(*m_window).draw(m_renderSprite);
+}
+void GameMap::draw(bool old) {
 	sf::Sprite tmp_sprite;
 	int offsetX = (m_windowSizeX - m_mapOnScreenSizeX) * 0.5;
 	int offsetY = (m_windowSizeY - m_mapOnScreenSizeY) * 0.5;
 	float scale = tileSize / 32;
-	for(int ix = 0; ix < m_mapSizeX; ix++)
+
+	for (int ix = 0; ix < m_mapSizeX; ix++) {
 		for (int iy = 0; iy < m_mapSizeY; iy++) {
-			tmp_sprite.setTexture(m_map[ix][iy].texture);
-			tmp_sprite.setTextureRect(sf::IntRect(0,0,32,32));
-			tmp_sprite.setScale(scale, scale);
+			tmp_sprite.setTexture((*m_resourceManager).getTexture(m_map[ix][iy].texture));
+			tmp_sprite.setTextureRect(sf::IntRect(0, 0, 32, 32));
 			tmp_sprite.setPosition(sf::Vector2f(ix * tileSize + offsetX, iy * tileSize + offsetY));
+			tmp_sprite.setScale(scale, scale);
 			(*m_window).draw(tmp_sprite);
 		}
+	}
 }
 
 

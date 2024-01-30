@@ -36,21 +36,20 @@ std::string ResourceManager::loadMap(std::string mapName)
 	return loaded;
 }
 
-std::string ResourceManager::loadTexture(std::string texName, std::string i_path)
+sf::Texture& ResourceManager::loadTexture(std::string texName, std::string i_path)
 {
 	sf::Texture tmp_texture;
 	if (!tmp_texture.loadFromFile(m_path + i_path)) {
 		std::cout << "can't load image: " << i_path << std::endl;
-		return "";
+		return sf::Texture();
 	}
 	std::cout << "load image: " << i_path << std::endl;
 	m_textureMap[texName] = tmp_texture;
-	return texName;
+	return m_textureMap[texName];
 }
 
-sf::Texture ResourceManager::getTexture(std::string texName)
+sf::Texture& ResourceManager::getTexture(std::string texName)
 {
 	sf::Texture tmp_texture;
-	tmp_texture = m_textureMap[texName];
-	return tmp_texture;
+	return m_textureMap[texName];
 }

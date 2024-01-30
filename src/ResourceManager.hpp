@@ -19,8 +19,8 @@ public:
 
 	std::string loadMap(std::string i_path);
 
-	std::string loadTexture(std::string texName, std::string i_path);
+	sf::Texture& loadTexture(std::string texName, std::string i_path);
 	//sf::Texture& getTexture(std::string texName);
-	sf::Texture getTexture(std::string texName);
+	sf::Texture& getTexture(std::string texName);
 
 };

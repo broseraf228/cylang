@@ -13,14 +13,18 @@ int main(int argc, char* argv[]) {
 	ResourceManager resManager(i_path);
 	std::cout << resManager.loadStringFromFile("maps\\map1.txt") << std::endl;
 	
-	sf::RenderWindow window(sf::VideoMode(1200, 800), "SFML game", sf::Style::Fullscreen);
-	window.setVerticalSyncEnabled(true);
+	sf::RenderWindow window(sf::VideoMode(1200, 800), "SFML game");
 
 	GameMap gameMap(&window, &resManager, 1,1);
 
-
 	gameMap.loadMapFromStr(resManager.loadMap("map1"));
 
+	sf::Texture texture;
+	texture = resManager.getTexture("fne");
+	sf::Sprite sprite;
+	sprite.setTexture(texture);
+	sprite.setTextureRect(sf::IntRect(0,0,32,32));
+	sprite.setPosition(sf::Vector2f(100,100));
 
 	sf::Clock clock;
 	while (window.isOpen()) {
