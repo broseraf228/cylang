@@ -2,29 +2,48 @@
 #include "m_std.hpp"
 #include <iostream>
 
-GameMap::GameMap(sf::RenderWindow* window, int mapSX, int mapSY) {
+
+Tile::Tile(std::string texName, ResourceManager& resMan) {
+	texture = resMan.getTexture(texName);
+}
+Tile::Tile() {
+
+}
+
+
+GameMap::GameMap(sf::RenderWindow* window, ResourceManager* i_resourceManager, int mapSX, int mapSY) {
 	//сохран€ю переменные
 	m_window = window;
+	m_resourceManager = i_resourceManager;
 	m_windowSizeX = (*window).getSize().x;
 	m_windowSizeY = (*window).getSize().y;
 	m_mapSizeX = mapSX;
 	m_mapSizeY = mapSY;
 
 	setMapSize();
+
 	//очевидно
 	m_vertexArray.setPrimitiveType(sf::Quads);
-
-	//временный форскод, извин€юсь
-	colorMap[0] = sf::Color::Magenta;
-	colorMap[1] = sf::Color::White;
-	colorMap[2] = sf::Color::Red;
-	colorMap[3] = sf::Color::Green;
-	colorMap[4] = sf::Color::Blue;
 }
 GameMap::~GameMap() {}
 
 void GameMap::loadMapFromStr(std::string inMap) {
 	std::vector<std::string> splittedMapf = splitString(inMap, '\n');
+	//загрузка таблицы тайлов
+	std::string current_str;
+	std::vector <std::string> current_str_list;
+	while (splittedMapf[0][0] == '@') 
+	{
+		current_str = splittedMapf[0];
+		current_str.erase(current_str.begin());
+		current_str_list = splitString(current_str, ',');
+		(*m_resourceManager).loadTexture(current_str_list[0], current_str_list[1]);
+		splittedMapf.erase(splittedMapf.cbegin());
+	}
+
+
+	//этап загрузки карты
+	
 	std::vector<std::vector<std::string>> splittedMap;
 	splittedMap.resize(splittedMapf.size());
 	for (int i = 0; i < splittedMapf.size(); i++) {
@@ -36,22 +55,11 @@ void GameMap::loadMapFromStr(std::string inMap) {
 	setMapSize();
 	for (int ix = 0; ix < m_mapSizeX; ix++) {
 		for (int iy = 0; iy < m_mapSizeY; iy++) {
-			m_map[ix][iy] = std::stoi(splittedMap[iy][ix]);
+			m_map[ix][iy] = Tile(splittedMap[iy][ix], *m_resourceManager);
 		}
 	}
 
-}
-
-void GameMap::setMapSize(int sX, int sY) {
-	m_mapSizeX = sX;
-	m_mapSizeY = sY;
-	setMapSize();
-}
-void GameMap::setMapSize() {
-	m_map.resize(m_mapSizeX);
-	for (int i = 0; i < m_map.size(); i++)
-		m_map[i].resize(m_mapSizeY);
-
+	//все дл€ корректного отображени€ карты
 	//масштабирую карту под размеры окна (Ќ≈ “–ќ√ј“№ ѕќ ј Ќ≈ —Ћќћј≈“—я)
 	double rat = (double)m_mapSizeX / m_mapSizeY;
 
@@ -64,33 +72,52 @@ void GameMap::setMapSize() {
 	}
 	//вычисл€ю размер тайла в пиксел€х
 	tileSize = (float)m_mapOnScreenSizeX / m_mapSizeX;
+
 }
 
-void GameMap::fillMap() {
-	int col = rand() % 5;
-	for (int ix = 0; ix < m_map.size(); ix++) {
-		for (int iy = 0; iy < m_map[ix].size(); iy++) {
-			col = rand() % 5;
-			m_map[ix][iy] = col;
-			//std::cout << "ix=" << ix << "\tiy=" << iy << "\tsizeX=" << m_map.size() << "\tsizeY=" << m_map[ix].size() << "color: " << col << std::endl;
-		}
-	}
+void GameMap::setMapSize(int sX, int sY) {
+	m_mapSizeX = sX;
+	m_mapSizeY = sY;
+	setMapSize();
+}
+void GameMap::setMapSize() {
+	m_map.resize(m_mapSizeX);
+	for (int i = 0; i < m_map.size(); i++)
+		m_map[i].resize(m_mapSizeY);
 }
 
-void GameMap::fillVertexArray() {
-	m_vertexArray.clear();
-	int counter = 0;
+
+void GameMap::draw() {
+	sf::Sprite tmp_sprite;
 	int offsetX = (m_windowSizeX - m_mapOnScreenSizeX) * 0.5;
 	int offsetY = (m_windowSizeY - m_mapOnScreenSizeY) * 0.5;
-	for (int ix = 0; ix < m_map.size(); ix++) {
-		for (int iy = 0; iy < m_map[ix].size(); iy++) {
-			counter++;
-			addSqare(ix * tileSize + offsetX, iy * tileSize + offsetY, colorMap[m_map[ix][iy]]);
-			//std::cout << "ix=" << ix << "\tiy=" << iy << "\tsizeX=" << m_map.size() << "\tsizeY=" << m_map[ix].size() << std::endl;
+	float scale = tileSize / 32;
+	for(int ix = 0; ix < m_mapSizeX; ix++)
+		for (int iy = 0; iy < m_mapSizeY; iy++) {
+			tmp_sprite.setTexture(m_map[ix][iy].texture);
+			tmp_sprite.setTextureRect(sf::IntRect(0,0,32,32));
+			tmp_sprite.setScale(scale, scale);
+			tmp_sprite.setPosition(sf::Vector2f(ix * tileSize + offsetX, iy * tileSize + offsetY));
+			(*m_window).draw(tmp_sprite);
 		}
-	}
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+sf::VertexArray& GameMap::getVertexArray() {
+	return m_vertexArray;
+}
 void GameMap::addSqare(int posX, int posY, sf::Color color) {
 	m_vertexArray.append(sf::Vertex(sf::Vector2f(posX, posY), color));
 	m_vertexArray.append(sf::Vertex(sf::Vector2f(posX + tileSize, posY), color));
@@ -102,12 +129,4 @@ void GameMap::addSqare(int posX, int posY, int sizeX, int sizeY, sf::Color color
 	m_vertexArray.append(sf::Vertex(sf::Vector2f(posX + sizeX, posY), color));
 	m_vertexArray.append(sf::Vertex(sf::Vector2f(posX + sizeX, posY + sizeY), color));
 	m_vertexArray.append(sf::Vertex(sf::Vector2f(posX, posY + sizeY), color));
-}
-
-sf::VertexArray& GameMap::getVertexArray() {
-	return m_vertexArray;
-}
-
-void GameMap::draw() {
-	(*m_window).draw(m_vertexArray);
 }

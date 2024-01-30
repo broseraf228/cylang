@@ -2,12 +2,23 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 #include <vector>
+#include "ResourceManager.hpp"
+
+
+struct Tile {
+public:
+	Tile(std::string texName, ResourceManager& resMan);
+	Tile();
+
+	sf::Texture texture;
+};
 
 
 class GameMap
 {
 private:
 	std::map<int, sf::Color> colorMap;
+	ResourceManager* m_resourceManager;
 
 	sf::RenderWindow* m_window;
 	sf::VertexArray m_vertexArray;
@@ -16,12 +27,12 @@ private:
 	float m_mapOnScreenSizeX, m_mapOnScreenSizeY;
 	double tileSize;
 
-	std::vector< std::vector <int> > m_map;
+	std::vector< std::vector <Tile> > m_map;
 
 	void addSqare(int posX, int posY, sf::Color color);
 	void setMapSize(int sX, int sY);
 public:
-	GameMap(sf::RenderWindow* window, int mapSX, int mapSY);
+	GameMap(sf::RenderWindow* window, ResourceManager* i_resourceManager, int mapSX, int mapSY);
 	~GameMap();
 
 	void loadMapFromStr(std::string inMap);
@@ -29,10 +40,6 @@ public:
 	void addSqare(int posX, int posY, int sizeX, int sizeY, sf::Color color);
 
 	void setMapSize();
-
-	void fillMap();
-
-	void fillVertexArray();
 
 	void draw();
 	sf::VertexArray& getVertexArray();

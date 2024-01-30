@@ -17,9 +17,6 @@ add_executable(${PROJECT_NAME}
 				src/ResourceManager.cpp
 				)
 
-FILE(COPY res DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG}")
-FILE(COPY res DESTINATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE}")
-
 include(FetchContent)
 FetchContent_Declare(SFML
     GIT_REPOSITORY https://github.com/SFML/SFML.git
